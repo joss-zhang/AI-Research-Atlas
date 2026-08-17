@@ -1,0 +1,465 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="以高通 SA515M 5G 芯片、移远 AG55xQ 车规模组、Tier1 T-BOX 与整车集成为例，系统拆解 RFQ、定点、DV、PV、PPAP、SOP、EOP 与 APQP 的目标、交付物和放行条件。">
+  <title>汽车零部件开发：RFQ、定点、DV、PV、PPAP、SOP、EOP</title>
+  <style>
+    :root {
+      --paper: #ffffff;
+      --soft: #f5f7fa;
+      --soft-blue: #edf4ff;
+      --ink: #111318;
+      --body: #343a46;
+      --muted: #68707e;
+      --line: #dfe3e9;
+      --line-strong: #b7c1ce;
+      --blue: #0b5bd3;
+      --blue-dark: #0646a5;
+      --code: #111923;
+      --max: 1240px;
+      --aside: 238px;
+      --sans: "Microsoft YaHei", "PingFang SC", "Noto Sans CJK SC", system-ui, -apple-system, sans-serif;
+      --mono: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; scroll-padding-top: 24px; }
+    body { min-width: 320px; margin: 0; overflow-x: hidden; background: var(--paper); color: var(--ink); font: 16px/1.78 var(--sans); text-rendering: optimizeLegibility; }
+    a { color: var(--blue); text-underline-offset: 3px; }
+    button { font: inherit; }
+    :focus-visible { outline: 3px solid var(--blue); outline-offset: 3px; }
+    .skip { position: fixed; z-index: 20; top: 10px; left: 10px; padding: 9px 13px; transform: translateY(-150%); background: var(--blue); color: #fff; }
+    .skip:focus { transform: none; }
+    .progress { position: fixed; z-index: 30; inset: 0 auto auto 0; width: 0; height: 3px; background: var(--blue); }
+    .mobile-bar { display: none; }
+    .shell { display: grid; grid-template-columns: var(--aside) minmax(0, 1fr); width: min(calc(100% - 48px), calc(var(--max) + var(--aside) + 40px)); margin: 0 auto; }
+    .toc { position: sticky; top: 0; align-self: start; height: 100vh; padding: 30px 28px 30px 0; border-right: 1px solid var(--line); overflow: auto; }
+    .toc-brand { display: flex; align-items: center; gap: 9px; margin-bottom: 33px; color: var(--ink); font-weight: 800; text-decoration: none; }
+    .toc-mark { width: 16px; height: 16px; border: 2px solid var(--blue); }
+    .toc-label { margin: 0 0 10px; color: var(--muted); font: 800 10px/1.4 var(--mono); letter-spacing: .12em; }
+    .toc ol { margin: 0; padding: 0; list-style: none; border-top: 1px solid var(--line-strong); }
+    .toc li { border-bottom: 1px solid var(--line); }
+    .toc a { display: grid; grid-template-columns: 24px 1fr; gap: 8px; padding: 9px 0; color: var(--muted); font-size: 12px; text-decoration: none; }
+    .toc a:hover { color: var(--blue); }
+    .toc .num { color: var(--blue); font: 11px var(--mono); }
+    .toc-note { margin: 35px 0 0; color: var(--muted); font-size: 11px; }
+    main { min-width: 0; padding: 0 0 80px 52px; }
+    .hero { padding: 72px 0 65px; border-bottom: 1px solid var(--line-strong); }
+    .eyebrow { margin: 0 0 15px; color: var(--blue); font: 800 11px/1.4 var(--mono); letter-spacing: .13em; }
+    h1, h2, h3, h4, p { overflow-wrap: anywhere; }
+    h1 { max-width: 990px; margin: 0; font-size: clamp(42px, 6.4vw, 80px); line-height: 1.06; letter-spacing: -.06em; }
+    h1 span { color: var(--blue); }
+    .subtitle { max-width: 800px; margin: 24px 0 0; color: var(--body); font-size: clamp(18px, 2.2vw, 23px); line-height: 1.58; }
+    .hero-meta { display: flex; flex-wrap: wrap; gap: 10px 28px; margin-top: 31px; color: var(--muted); font-size: 12px; }
+    .hero-meta strong { color: var(--ink); }
+    .value-strip { display: grid; grid-template-columns: 1.15fr .85fr; gap: 30px; margin-top: 42px; padding-top: 22px; border-top: 2px solid var(--ink); }
+    .value-strip p { margin: 0; color: var(--body); }
+    .value-strip .rule { padding-left: 18px; border-left: 3px solid var(--blue); color: var(--muted); font-size: 13px; }
+    section { padding-top: 62px; }
+    .section-head { display: grid; grid-template-columns: minmax(0, 1fr) minmax(210px, .48fr); gap: 34px; align-items: end; margin-bottom: 26px; }
+    h2 { margin: 0; font-size: clamp(29px, 4vw, 48px); line-height: 1.18; letter-spacing: -.045em; }
+    .section-intro { margin: 0; color: var(--muted); font-size: 13px; }
+    .signal-grid { display: grid; grid-template-columns: repeat(3, 1fr); border-top: 1px solid var(--ink); border-bottom: 1px solid var(--line-strong); }
+    .signal { min-width: 0; padding: 22px 26px 25px 0; border-right: 1px solid var(--line); }
+    .signal + .signal { padding-left: 26px; }
+    .signal:last-child { border-right: 0; }
+    .signal strong { display: block; margin-bottom: 8px; color: var(--blue); font-size: 14px; }
+    .signal p { margin: 0; color: var(--body); font-size: 14px; }
+    .callout { margin-top: 24px; padding: 19px 21px; background: var(--soft-blue); border-left: 3px solid var(--blue); color: var(--body); }
+    .callout strong { color: var(--ink); }
+    .path { display: grid; grid-template-columns: repeat(7, 1fr); margin-top: 36px; border-top: 2px solid var(--blue); }
+    .path-node { position: relative; min-width: 0; padding: 22px 16px 4px 0; }
+    .path-node + .path-node { padding-left: 16px; border-left: 1px solid var(--line); }
+    .path-node::before { content: ""; position: absolute; top: -6px; left: 0; width: 10px; height: 10px; border: 2px solid var(--blue); border-radius: 50%; background: #fff; }
+    .path-node + .path-node::after { content: "→"; position: absolute; top: -19px; left: -11px; color: var(--blue); font: 13px var(--mono); }
+    .path-node .abbr { display: block; color: var(--blue); font: 800 14px var(--mono); }
+    .path-node strong { display: block; margin-top: 6px; font-size: 13px; }
+    .path-node small { display: block; margin-top: 3px; color: var(--muted); font-size: 11px; line-height: 1.5; }
+    .definition-table, .handoff-table, .raci-table, .req-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .table-wrap { overflow-x: auto; border-top: 1px solid var(--ink); border-bottom: 1px solid var(--line-strong); }
+    th { color: var(--muted); font-size: 11px; font-weight: 800; text-align: left; letter-spacing: .02em; }
+    th, td { min-width: 125px; padding: 13px 14px 13px 0; border-bottom: 1px solid var(--line); vertical-align: top; text-align: left; }
+    th + th, td + td { padding-left: 14px; }
+    tr:last-child td { border-bottom: 0; }
+    td strong { color: var(--ink); }
+    .apqp-map { display: grid; grid-template-columns: 90px 1fr; border-top: 1px solid var(--ink); border-bottom: 1px solid var(--line-strong); }
+    .apqp-phase { padding: 21px 18px 21px 0; border-bottom: 1px solid var(--line); color: var(--blue); font: 800 12px/1.5 var(--mono); }
+    .apqp-detail { padding: 18px 0 18px 18px; border-bottom: 1px solid var(--line); }
+    .apqp-detail:last-child, .apqp-phase:nth-last-child(2) { border-bottom: 0; }
+    .apqp-detail strong { display: block; margin-bottom: 4px; }
+    .apqp-detail p { margin: 0; color: var(--muted); font-size: 13px; }
+    .case-chain { display: grid; grid-template-columns: 1fr 34px 1fr 34px 1fr 34px 1fr; align-items: stretch; margin-top: 30px; }
+    .chain-node { min-width: 0; padding: 21px 20px; background: var(--soft); border-top: 2px solid var(--blue); }
+    .chain-node .label { display: block; margin-bottom: 7px; color: var(--blue); font: 800 10px var(--mono); letter-spacing: .08em; }
+    .chain-node strong { display: block; font-size: 17px; line-height: 1.3; }
+    .chain-node p { margin: 8px 0 0; color: var(--muted); font-size: 12px; line-height: 1.55; }
+    .chain-arrow { display: grid; place-items: center; color: var(--blue); font: 18px var(--mono); }
+    .case-note { margin: 18px 0 0; color: var(--muted); font-size: 12px; }
+    .stage { scroll-margin-top: 20px; padding: 46px 0 52px; border-top: 1px solid var(--line-strong); }
+    .stage:first-of-type { margin-top: 33px; }
+    .stage-head { display: grid; grid-template-columns: 88px 1fr auto; gap: 22px; align-items: start; }
+    .stage-no { color: var(--blue); font: 800 19px var(--mono); }
+    .stage-title h3 { margin: 0; font-size: clamp(25px, 3.2vw, 37px); line-height: 1.18; letter-spacing: -.035em; }
+    .stage-title p { max-width: 760px; margin: 8px 0 0; color: var(--muted); font-size: 13px; }
+    .gate { padding: 7px 10px; background: var(--soft-blue); color: var(--blue-dark); font-size: 11px; font-weight: 800; white-space: nowrap; }
+    .stage-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 42px; margin-top: 26px; }
+    .stage-block { padding: 17px 0 18px; border-top: 1px solid var(--line); }
+    .stage-block h4 { margin: 0 0 7px; color: var(--blue); font-size: 13px; }
+    .stage-block p { margin: 0; color: var(--body); font-size: 14px; }
+    .stage-block ul, .stage-block ol { margin: 0; padding-left: 20px; color: var(--body); font-size: 13px; }
+    .stage-block li + li { margin-top: 4px; }
+    .deliverables { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 11px; }
+    .deliverable { padding: 4px 8px; background: var(--soft); color: var(--body); font-size: 11px; }
+    .deliverable::before { content: "↳ "; color: var(--blue); }
+    .gate-row { display: grid; grid-template-columns: repeat(3, 1fr); margin-top: 24px; border-top: 1px solid var(--line); }
+    .gate-row div { padding: 16px 17px 0 0; border-right: 1px solid var(--line); }
+    .gate-row div + div { padding-left: 17px; }
+    .gate-row div:last-child { border-right: 0; }
+    .gate-row strong { display: block; font-size: 12px; }
+    .gate-row p { margin: 4px 0 0; color: var(--muted); font-size: 12px; }
+    .handoff-table td:first-child { width: 120px; color: var(--blue); font-weight: 800; }
+    .raci-table td:first-child { width: 160px; font-weight: 800; }
+    .req-table td:first-child { width: 130px; color: var(--blue); font-family: var(--mono); font-size: 11px; }
+    .checklist { display: grid; grid-template-columns: 1fr 1fr; gap: 0 42px; margin: 0; padding: 0; list-style: none; border-top: 1px solid var(--ink); }
+    .checklist li { position: relative; padding: 15px 0 15px 31px; border-bottom: 1px solid var(--line); color: var(--body); font-size: 13px; }
+    .checklist li::before { content: ""; position: absolute; top: 19px; left: 1px; width: 13px; height: 13px; border: 2px solid var(--blue); }
+    .source-list { margin: 0; padding-left: 20px; columns: 2; column-gap: 52px; }
+    .source-list li { break-inside: avoid; margin-bottom: 14px; padding-left: 5px; color: var(--muted); font-size: 12px; }
+    .source-list a { color: var(--ink); }
+    .source-list small { display: block; color: var(--muted); }
+    .conclusion { margin-top: 65px; padding: 34px 38px; background: var(--blue); color: #fff; }
+    .conclusion .eyebrow { color: #dceaff; }
+    .conclusion p { margin: 0; font-size: clamp(24px, 3.4vw, 38px); line-height: 1.45; font-weight: 800; letter-spacing: -.035em; }
+    footer { padding: 28px 0 0; color: var(--muted); font-size: 11px; text-align: center; }
+    .backtop { position: fixed; z-index: 15; right: 20px; bottom: 20px; width: 42px; height: 42px; border: 1px solid var(--line-strong); background: #fff; color: var(--blue); cursor: pointer; opacity: 0; pointer-events: none; transition: opacity .2s; }
+    .backtop.show { opacity: 1; pointer-events: auto; }
+    @media (max-width: 1060px) {
+      .shell { display: block; width: min(calc(100% - 48px), var(--max)); }
+      .toc { display: none; }
+      main { padding-left: 0; }
+      .mobile-bar { position: sticky; z-index: 10; top: 0; display: flex; align-items: center; justify-content: space-between; padding: 11px 18px; border-bottom: 1px solid var(--line); background: rgba(255,255,255,.96); }
+      .mobile-bar strong { font-size: 13px; }
+      .mobile-bar a { color: var(--blue); font-size: 12px; }
+      .path { grid-template-columns: repeat(4, 1fr); gap: 22px 0; border-top: 0; }
+      .path-node { border-top: 2px solid var(--blue); }
+      .path-node + .path-node::after { display: none; }
+      .case-chain { grid-template-columns: 1fr 28px 1fr; gap: 0 0; }
+      .chain-node:nth-of-type(3), .chain-arrow:nth-of-type(4), .chain-node:nth-of-type(5), .chain-arrow:nth-of-type(6) { margin-top: 18px; }
+      .chain-node:nth-of-type(5) { grid-column: 1; }
+      .chain-arrow:nth-of-type(6) { grid-column: 2; }
+      .chain-node:nth-of-type(7) { grid-column: 3; }
+    }
+    @media (max-width: 700px) {
+      body { font-size: 15px; }
+      .shell { width: min(calc(100% - 36px), var(--max)); }
+      .hero { padding: 49px 0 50px; }
+      h1 { font-size: clamp(39px, 13vw, 59px); }
+      .value-strip, .section-head, .stage-grid { grid-template-columns: 1fr; gap: 20px; }
+      .signal-grid { grid-template-columns: 1fr; }
+      .signal, .signal + .signal { padding: 18px 0; border-right: 0; border-bottom: 1px solid var(--line); }
+      .signal:last-child { border-bottom: 0; }
+      .path { grid-template-columns: 1fr 1fr; gap: 19px 0; }
+      .path-node, .path-node + .path-node { padding: 19px 12px 0 0; border-top: 2px solid var(--blue); border-left: 0; }
+      .path-node:nth-child(odd) { padding-right: 15px; }
+      .path-node:nth-child(even) { padding-left: 15px; border-left: 1px solid var(--line); }
+      .path-node:nth-child(even)::before { left: 15px; }
+      .case-chain { grid-template-columns: 1fr; gap: 8px; }
+      .chain-arrow, .chain-node:nth-of-type(3), .chain-arrow:nth-of-type(4), .chain-node:nth-of-type(5), .chain-arrow:nth-of-type(6), .chain-node:nth-of-type(7) { grid-column: 1; grid-row: auto; margin-top: 0; }
+      .chain-arrow { min-height: 22px; transform: rotate(90deg); }
+      .stage-head { grid-template-columns: 48px 1fr; gap: 10px; }
+      .gate { grid-column: 2; justify-self: start; }
+      .gate-row { grid-template-columns: 1fr; }
+      .gate-row div, .gate-row div + div { padding: 13px 0; border-right: 0; border-bottom: 1px solid var(--line); }
+      .gate-row div:last-child { border-bottom: 0; }
+      .checklist { grid-template-columns: 1fr; }
+      .source-list { columns: 1; }
+      .conclusion { padding: 27px 23px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+    }
+    @media print {
+      .toc, .mobile-bar, .progress, .backtop { display: none !important; }
+      .shell { display: block; width: 100%; }
+      main { padding: 0; }
+      .hero { padding-top: 20px; }
+      section, .stage { break-inside: auto; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip" href="#content">跳到正文</a>
+  <div class="progress" aria-hidden="true"></div>
+  <div class="mobile-bar"><strong>汽车零部件开发流程</strong><a href="#stages">跳到阶段拆解</a></div>
+  <div class="shell">
+    <aside class="toc" aria-label="文章目录">
+      <a class="toc-brand" href="../index.html"><span class="toc-mark" aria-hidden="true"></span><span>AI 研究图谱</span></a>
+      <p class="toc-label">研究导航 / 2026.08</p>
+      <ol>
+        <li><a href="#overview"><span class="num">01</span><span>先记住三个判断</span></a></li>
+        <li><a href="#path"><span class="num">02</span><span>全局逻辑路径</span></a></li>
+        <li><a href="#terms"><span class="num">03</span><span>术语边界</span></a></li>
+        <li><a href="#apqp"><span class="num">04</span><span>APQP 主骨架</span></a></li>
+        <li><a href="#case"><span class="num">05</span><span>四层案例链</span></a></li>
+        <li><a href="#stages"><span class="num">06</span><span>七个阶段拆解</span></a></li>
+        <li><a href="#handoff"><span class="num">07</span><span>交接与责任</span></a></li>
+        <li><a href="#checklist"><span class="num">08</span><span>落地检查表</span></a></li>
+        <li><a href="#sources"><span class="num">09</span><span>来源与口径</span></a></li>
+      </ol>
+      <p class="toc-note">本页是行业通用研究框架，不替代具体 OEM 的供应商手册、客户特殊要求或项目合同。</p>
+    </aside>
+
+    <main id="content">
+      <header class="hero">
+        <p class="eyebrow">AI-RESEARCH-ATLAS / 汽车产业链质量开发</p>
+        <h1>从一次询价，走到<span>最后一件量产件</span>。</h1>
+        <p class="subtitle">RFQ、定点、DV、PV、PPAP、SOP、EOP 不是七个孤立缩写，而是一条把商业承诺、工程证据、制造能力、客户批准和生命周期责任串起来的质量证据链。</p>
+        <div class="hero-meta"><span>研究日期：<strong>2026-08-11</strong></span><span>案例：高通 SA515M → 移远 AG55xQ → Tier1 T-BOX → 整车</span><span>框架：AIAG APQP 第 3 版 / PPAP 第 4 版</span></div>
+        <div class="value-strip">
+          <p>读完后，你应该能回答：每个阶段到底要把什么风险关掉？谁负责提交什么证据？什么条件满足后才能把责任交给下一阶段？</p>
+          <p class="rule"><strong>核心判断：</strong>汽车开发的“完成”不是样件能工作，而是需求、设计、过程、产能、批准和持续供货都能被证据追溯。</p>
+        </div>
+      </header>
+
+      <section id="overview" aria-labelledby="overview-title">
+        <div class="section-head"><div><p class="eyebrow">先校准</p><h2 id="overview-title">三个判断，避免把流程读错。</h2></div><p class="section-intro">行业缩写在不同 OEM、Tier1 和芯片供应商内部可能有不同叫法。先固定本页采用的工作口径。</p></div>
+        <div class="signal-grid">
+          <article class="signal"><strong>01 / APQP 是主骨架</strong><p>RFQ 与定点是商务和供应商选择的前置层；定点后，APQP 把产品、过程和反馈活动组织成有门禁的开发计划。APQP 不是一套“交资料”的清单，而是把风险前移。</p></article>
+          <article class="signal"><strong>02 / DV、PV 不是全球唯一释义</strong><p>本页将 DV 定义为设计验证，将 PV 定义为产品与生产验证。部分企业把 PV 叫产品验证，另一些企业把它叫生产验证；以客户的 DVP&R、试验规范和质量门为准。</p></article>
+          <article class="signal"><strong>03 / PPAP 批准不等于 SOP</strong><p>PPAP 证明生产意图的零件和过程具备稳定满足要求的能力；SOP 还要看工厂是否能按节拍交付、物流是否就绪、现场是否完成安全投产和爬坡管理。</p></article>
+        </div>
+        <div class="callout"><strong>阅读方式：</strong>把每个阶段看成一个“风险关闭器”。阶段输入来自前一阶段的承诺和证据；阶段输出必须是下一阶段能够复用的基线，而不是只在评审会上展示的幻灯片。</div>
+      </section>
+
+      <section id="path" aria-labelledby="path-title">
+        <div class="section-head"><div><p class="eyebrow">七个节点</p><h2 id="path-title">商业承诺 → 工程证据 → 生命周期退出。</h2></div><p class="section-intro">这条路径是项目管理的全局视图。实际项目会有回环：DV 失败会回到设计，PV 失败会回到过程，EOP 也可能因替代料或软件支持重新打开变更。</p></div>
+        <div class="path" aria-label="RFQ 到 EOP 的流程路径">
+          <a class="path-node" href="#rfq"><span class="abbr">RFQ</span><strong>询价报价</strong><small>把需求变成可核算的承诺</small></a>
+          <a class="path-node" href="#nomination"><span class="abbr">定点</span><strong>项目授予</strong><small>锁定供应商与商业边界</small></a>
+          <a class="path-node" href="#dv"><span class="abbr">DV</span><strong>设计验证</strong><small>证明设计满足输入要求</small></a>
+          <a class="path-node" href="#pv"><span class="abbr">PV</span><strong>产品 / 生产验证</strong><small>证明量产意图可用且可造</small></a>
+          <a class="path-node" href="#ppap"><span class="abbr">PPAP</span><strong>生产批准</strong><small>让客户批准放行证据</small></a>
+          <a class="path-node" href="#sop"><span class="abbr">SOP</span><strong>量产启动</strong><small>把项目交给稳定运营</small></a>
+          <a class="path-node" href="#eop"><span class="abbr">EOP</span><strong>项目结束</strong><small>收尾、服务与退出管理</small></a>
+        </div>
+      </section>
+
+      <section id="terms" aria-labelledby="terms-title">
+        <div class="section-head"><div><p class="eyebrow">词典</p><h2 id="terms-title">七个缩写的“工作定义”。</h2></div><p class="section-intro">定义用于建立跨供应链的共同语言；具体模板、提交等级、样件数量和时间节点仍受客户特殊要求、合同和项目类型约束。</p></div>
+        <div class="table-wrap">
+          <table class="definition-table">
+            <thead><tr><th>节点</th><th>英文 / 中文</th><th>本页工作定义</th><th>最容易误解的地方</th></tr></thead>
+            <tbody>
+              <tr><td><strong>RFQ</strong></td><td>Request for Quotation<br>询价 / 报价</td><td>客户邀请供应商基于规格、数量、节拍和商务条款提交可执行报价。</td><td>不是只报一个单价；报价必须包含假设、产能、模具、开发费用、认证、风险和交付边界。</td></tr>
+              <tr><td><strong>定点</strong></td><td>Nomination / Award<br>项目定点</td><td>客户在候选供应商中授予项目或零件业务，锁定初始商业和开发责任。</td><td>定点不是“所有设计已冻结”，工程输入、接口、变更和目标仍需通过后续评审逐步收敛。</td></tr>
+              <tr><td><strong>DV</strong></td><td>Design Verification<br>设计验证</td><td>用测试、分析和审查证明设计输出满足设计输入、法规和接口要求。</td><td>实验室样件通过不代表量产过程稳定，也不代表整车环境和生产意图状态已经验证。</td></tr>
+              <tr><td><strong>PV</strong></td><td>Product / Production Validation<br>产品 / 生产验证</td><td>用生产意图的产品、设备和过程，在代表性环境中验证产品能用、过程能造。</td><td>“PV”在不同公司含义不同；必须在项目计划里写明测试对象、样件状态和判定标准。</td></tr>
+              <tr><td><strong>PPAP</strong></td><td>Production Part Approval Process<br>生产件批准程序</td><td>供应商证明实际生产过程能在规定生产速率下持续制造符合设计记录和规格的零件，并提交客户批准。</td><td>PPAP 不是把 DFMEA、尺寸报告打包上传就结束；客户批准状态、偏差关闭和生产批次真实性同样关键。</td></tr>
+              <tr><td><strong>SOP</strong></td><td>Start of Production<br>量产启动</td><td>项目进入正式系列生产与交付，生产、物流、质量、服务和软件版本开始按运营机制管理。</td><td>SOP 是起点不是终点；安全投产、爬坡、早期遏制和现场问题闭环往往决定项目是否真正成功。</td></tr>
+              <tr><td><strong>EOP</strong></td><td>End of Production<br>生产结束</td><td>车型、平台或零件的系列生产结束，进入收尾、备件、库存、工具和技术支持管理。</td><td>不能只关掉生产工单；电子零件还要处理芯片生命周期、固件、密钥、数据、售后和替代料。</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="apqp" aria-labelledby="apqp-title">
+        <div class="section-head"><div><p class="eyebrow">APQP 主骨架</p><h2 id="apqp-title">把七个项目节点放回五个质量阶段。</h2></div><p class="section-intro">AIAG 在 2024 年发布 APQP 第 3 版，并把 Control Plan 独立成单独手册；新版增加了采购、变更管理、项目指标、风险缓解、门禁管理和零件追溯等内容。</p></div>
+        <div class="apqp-map">
+          <div class="apqp-phase">阶段 1</div><div class="apqp-detail"><strong>项目策划与定义</strong><p>把客户之声、法规、项目目标、供应链策略、风险与时间表转成初始质量计划。RFQ 可以提前使用其中的估算活动，但正式 APQP 计划通常在项目被定义后展开；定点是供应商责任落地的关键输入。</p></div>
+          <div class="apqp-phase">阶段 2</div><div class="apqp-detail"><strong>产品设计与开发</strong><p>建立设计记录、系统与零件需求、设计评审、DFMEA、DVP&R、样件计划、接口和变更控制。DV 是这一阶段的主要证据门。</p></div>
+          <div class="apqp-phase">阶段 3</div><div class="apqp-detail"><strong>过程设计与开发</strong><p>把已确认的产品设计转成可制造的流程：流程图、PFMEA、控制计划、工装、检具、作业指导、包装、人员培训和过程能力计划。PV 的过程侧在这里打底。</p></div>
+          <div class="apqp-phase">阶段 4</div><div class="apqp-detail"><strong>产品与过程验证</strong><p>用生产意图零件和实际生产条件完成试生产、MSA、初始过程能力、性能与可靠性、包装和节拍验证，形成 PPAP 提交证据。PPAP 是客户批准门，不是所有验证活动的替代物。</p></div>
+          <div class="apqp-phase">阶段 5</div><div class="apqp-detail"><strong>反馈、评价与纠正措施</strong><p>SOP 后用量产数据、保修、客户投诉、现场故障、供应商表现和成本质量指标反馈到设计与过程；EOP 则把停产、备件、变更、追溯和知识归档纳入项目闭环。</p></div>
+        </div>
+        <div class="callout"><strong>工具链的依赖关系：</strong>客户需求 → 设计记录 → DFMEA / DVP&R → 过程流程 → PFMEA → 控制计划 → MSA / SPC → 试生产数据 → PPAP / PSW → SOP 运行数据。前一项没有形成基线，后一项就只能“补材料”，不能真正证明风险已关闭。</div>
+      </section>
+
+      <section id="case" aria-labelledby="case-title">
+        <div class="section-head"><div><p class="eyebrow">贯穿案例</p><h2 id="case-title">一颗芯片如何变成一辆车里的 T-BOX。</h2></div><p class="section-intro">案例选用高通 SA515M 与移远 AG55xQ，是因为移远官方资料明确说明 AG55xQ 基于符合 AEC‑Q100 的 SA515M 芯片，并面向 T‑Box、TCU、ADAS、C‑V2X 等汽车应用。</p></div>
+        <div class="case-chain" aria-label="芯片到整车的四层供应链">
+          <article class="chain-node"><span class="label">Tier 2 / 芯片</span><strong>高通 SA515M</strong><p>汽车级 5G 蜂窝通信芯片。关注芯片规格、AEC‑Q100、软件基线、供货周期、生命周期和芯片级变更。</p></article>
+          <div class="chain-arrow" aria-hidden="true">→</div>
+          <article class="chain-node"><span class="label">Tier 2 / 模组</span><strong>移远 AG55xQ</strong><p>车规 5G Sub‑6 模组，支持 SA/NSA、4G/3G/2G 回落、GNSS、可选 C‑V2X/DSDA，负责把芯片能力变成可集成的标准接口。</p></article>
+          <div class="chain-arrow" aria-hidden="true">→</div>
+          <article class="chain-node"><span class="label">Tier 1 / 系统</span><strong>T-BOX 集成</strong><p>Tier1 负责主板、电源、天线、GNSS、MCU/应用处理器、CAN/以太网、诊断、OTA、安全、结构与生产工艺。</p></article>
+          <div class="chain-arrow" aria-hidden="true">→</div>
+          <article class="chain-node"><span class="label">OEM / 整车</span><strong>整车集成</strong><p>整车厂验证网络覆盖、车端数据、eCall、远程控制、车云闭环、整车 EMC、法规、用户体验和量产交付。</p></article>
+        </div>
+        <p class="case-note"><strong>平台边界：</strong>高通 X75 是另一款面向 5G Advanced 的 Modem‑RF System，官方参数不能直接等同于 SA515M 或 AG55xQ。若项目改用 X75，应重新核对芯片—模组配对、射频前端、软件、认证、热设计、BOM 和 PPAP 证据。</p>
+      </section>
+
+      <section id="stages" aria-labelledby="stages-title">
+        <div class="section-head"><div><p class="eyebrow">七段拆解</p><h2 id="stages-title">每一阶段，交付什么才算真的向前走？</h2></div><p class="section-intro">以下内容按“目标—做什么—关键点—交付物—放行条件—常见失败”展开。项目应把它转化为带责任人、日期、状态和证据链接的 APQP 主计划。</p></div>
+
+        <article class="stage" id="rfq">
+          <div class="stage-head"><div class="stage-no">01<br>RFQ</div><div class="stage-title"><h3>询价报价：把一句需求变成一份可执行承诺。</h3><p>RFQ 是商业入口，也是第一次识别技术、供应链、认证和生命周期风险的机会。</p></div><span class="gate">报价基线</span></div>
+          <div class="stage-grid">
+            <div class="stage-block"><h4>做什么</h4><p>解析 OEM 的 RFQ、技术规范、SOR、预测量、SOP/EOP、地区和法规要求，建立需求假设与问题清单；由销售、采购、硬件、软件、射频、质量、制造、物流和财务共同核算报价。</p></div>
+            <div class="stage-block"><h4>案例落地：T-BOX 5G</h4><p>确认网络制式与频段、SA/NSA、4G 回落、GNSS 精度、eCall、C‑V2X、DSDA、天线数量、CAN/以太网接口、供电、温度、EMC、OTA、年需求和地区认证，再判断 SA515M + AG55xQ 是否满足边界。</p></div>
+            <div class="stage-block"><h4>关键交付物</h4><div class="deliverables"><span class="deliverable">报价单与成本分解</span><span class="deliverable">RFQ 假设与偏差表</span><span class="deliverable">BOM / 供应商初选</span><span class="deliverable">开发与认证报价</span><span class="deliverable">产能与投资计划</span><span class="deliverable">初始风险清单</span><span class="deliverable">项目主时间表</span><span class="deliverable">质保与服务假设</span></div></div>
+            <div class="stage-block"><h4>放行条件与失败模式</h4><ul><li>所有客户要求都有“满足 / 偏差 / 待澄清”状态，并由客户确认关键假设。</li><li>长周期芯片、模组固件、射频认证、天线和测试设备已纳入交期与现金流。</li><li>避免低价中标后再发现认证、夹具、云服务、备件和 EOP 责任没有报价。</li></ul></div>
+          </div>
+        </article>
+
+        <article class="stage" id="nomination">
+          <div class="stage-head"><div class="stage-no">02<br>定点</div><div class="stage-title"><h3>项目定点：锁定“谁来做、做什么、按什么规则做”。</h3><p>定点把候选方案变成客户授予的项目责任，但不是把所有工程不确定性伪装成已冻结。</p></div><span class="gate">业务授予</span></div>
+          <div class="stage-grid">
+            <div class="stage-block"><h4>做什么</h4><p>完成供应商技术、质量、商务、产能和合规评审，确定芯片、模组、Tier1 和 OEM 的边界；签署定点通知、采购合同、SOW、目标价格、预测量和项目门禁。</p></div>
+            <div class="stage-block"><h4>案例落地：四方责任</h4><p>高通负责 SA515M 的芯片与支持边界；移远负责 AG55xQ 模组、模组软件和认证支持；Tier1 负责 T‑BOX 系统设计与制造；OEM 负责整车需求、客户特殊要求、整车验证和最终批准。</p></div>
+            <div class="stage-block"><h4>关键交付物</h4><div class="deliverables"><span class="deliverable">定点通知 / 采购合同</span><span class="deliverable">SOW 与接口矩阵</span><span class="deliverable">版本化需求基线</span><span class="deliverable">责任矩阵 RACI</span><span class="deliverable">APQP 主计划</span><span class="deliverable">DVP&R 初版</span><span class="deliverable">长周期物料计划</span><span class="deliverable">变更与偏差流程</span></div></div>
+            <div class="stage-block"><h4>放行条件与失败模式</h4><ul><li>定点文件写清零件号、软件版本、区域变体、产能、工厂、SOP、EOP 和售后责任。</li><li>对“供应商自选”与“客户指定”料件标记责任差异，避免 Tier1 承担无法控制的质量风险。</li><li>避免只签价格不签版本；芯片、模组和云端接口的版本漂移会把 DV/PV 重新变成救火。</li></ul></div>
+          </div>
+        </article>
+
+        <article class="stage" id="dv">
+          <div class="stage-head"><div class="stage-no">03<br>DV</div><div class="stage-title"><h3>设计验证：证明设计“理论上与实验室里”满足输入。</h3><p>DV 关掉的是设计缺陷风险，重点是需求覆盖、边界条件和可重复的测试证据。</p></div><span class="gate">设计可行</span></div>
+          <div class="stage-grid">
+            <div class="stage-block"><h4>做什么</h4><p>将 OEM 需求分解到 T‑BOX、主板、模组、芯片、软件和天线，形成需求—设计—测试的可追溯矩阵；执行 DVP&R 中的电气、射频、通信、热、机械、EMC、定位、可靠性与安全测试。</p></div>
+            <div class="stage-block"><h4>案例落地：从芯片到模组</h4><ul><li>芯片级：确认 SA515M 供电、时钟、接口、电源状态、热阻、软件包、射频配置和生命周期。</li><li>模组级：验证 AG55xQ 的 SA/NSA、4G 回落、MIMO、GNSS、SIM、USB/PCIe/UART、AT 指令、DFOTA、C‑V2X 选项。</li><li>系统级：验证 T‑BOX 天线布局、CAN/以太网、唤醒、低功耗、数据上报、远程控制和车云接口。</li></ul></div>
+            <div class="stage-block"><h4>关键交付物</h4><div class="deliverables"><span class="deliverable">需求追溯矩阵</span><span class="deliverable">系统 / 硬件 / 软件设计记录</span><span class="deliverable">DFMEA</span><span class="deliverable">DVP&R 与测试报告</span><span class="deliverable">接口控制文件</span><span class="deliverable">射频与 EMC 预扫描</span><span class="deliverable">样件问题清单</span><span class="deliverable">工程变更记录</span></div></div>
+            <div class="stage-block"><h4>放行条件与失败模式</h4><ul><li>每项需求都有测试方法、样件状态、版本、环境、判定标准、原始数据和结论。</li><li>关键失效模式必须有纠正措施和回归测试，不能用“下版优化”替代关闭。</li><li>避免拿开发板或非量产天线的通过结果宣称设计冻结；量产器件、热设计和结构约束必须在 DV 后收敛。</li></ul></div>
+          </div>
+        </article>
+
+        <article class="stage" id="pv">
+          <div class="stage-head"><div class="stage-no">04<br>PV</div><div class="stage-title"><h3>产品 / 生产验证：证明“这套产品能造出来，也能在车上工作”。</h3><p>PV 把实验室的设计证据带到生产意图、整车环境和代表性生产节拍中。</p></div><span class="gate">量产意图</span></div>
+          <div class="stage-grid">
+            <div class="stage-block"><h4>做什么</h4><p>使用量产意图的芯片、模组、PCB、结构、软件和工装，在目标工厂以计划节拍进行试生产；将 T‑BOX 装车，执行整车环境、道路、网络、云端、法规和服务场景验证，同时验证过程流程、检具、人员、包装和物流。</p></div>
+            <div class="stage-block"><h4>案例落地：生产意图试验</h4><ul><li>车辆环境：冷启动、热浸、振动、湿热、盐雾、ESD、EMC、天线遮挡、弱覆盖和跨网切换。</li><li>功能闭环：紧急呼叫、远程诊断、OTA 断点续传、车辆状态上报、CAN 信号一致性、GNSS 漂移与组合导航。</li><li>制造验证：首件、工位防错、烧录与密钥注入、射频校准、终检、追溯、包装、Run at Rate。</li></ul></div>
+            <div class="stage-block"><h4>关键交付物</h4><div class="deliverables"><span class="deliverable">生产意图样件</span><span class="deliverable">过程流程图</span><span class="deliverable">PFMEA</span><span class="deliverable">控制计划</span><span class="deliverable">作业指导书</span><span class="deliverable">MSA 计划与结果</span><span class="deliverable">初始过程能力</span><span class="deliverable">试生产 / 节拍报告</span><span class="deliverable">包装与物流验证</span><span class="deliverable">问题关闭记录</span></div></div>
+            <div class="stage-block"><h4>放行条件与失败模式</h4><ul><li>试生产的设备、人员、物料、工艺参数和检验方法与未来量产一致，偏差必须登记。</li><li>过程能力不足时先改善或制定客户批准的临时控制，不能把试生产数据美化成量产能力。</li><li>避免只测“功能能否运行”，却没有覆盖烧录失败、版本错配、天线装反、密钥丢失和网络长期在线等制造失效。</li></ul></div>
+          </div>
+        </article>
+
+        <article class="stage" id="ppap">
+          <div class="stage-head"><div class="stage-no">05<br>PPAP</div><div class="stage-title"><h3>生产批准：把“我们认为可以”变成客户可审计的批准。</h3><p>PPAP 的核心是证明实际生产运行具备持续满足设计记录和规格的能力。提交等级、样件数量和额外要求由客户决定。</p></div><span class="gate">客户批准</span></div>
+          <div class="stage-grid">
+            <div class="stage-block"><h4>做什么</h4><p>基于 PV 的真实生产批次整理 PPAP 包，逐项确认设计记录、变更、工程批准、DFMEA、流程图、PFMEA、控制计划、MSA、尺寸、材料 / 性能、初始能力、实验室资质、样件、主样、检具、CSR 和 PSW。</p></div>
+            <div class="stage-block"><h4>案例落地：电子 T‑BOX 的证据重点</h4><ul><li>硬件：PCB 版本、BOM、芯片 / 模组批次、关键尺寸、焊接与涂覆、材料声明和可靠性。</li><li>软件：烧录镜像、版本校验、配置与标定、网络参数、Secure Boot / OTA 变更记录（按客户的软件批准流程）。</li><li>系统：整车接口、EMC、eCall、GNSS、C‑V2X、诊断、数据安全和包装标签的客户批准。</li></ul></div>
+            <div class="stage-block"><h4>典型提交物</h4><div class="deliverables"><span class="deliverable">PSW</span><span class="deliverable">设计记录与变更文件</span><span class="deliverable">DFMEA / PFMEA</span><span class="deliverable">流程图 / 控制计划</span><span class="deliverable">MSA</span><span class="deliverable">尺寸与材料报告</span><span class="deliverable">性能 / 可靠性报告</span><span class="deliverable">初始过程研究</span><span class="deliverable">实验室资质</span><span class="deliverable">样件 / 主样 / 检具</span><span class="deliverable">客户特殊要求</span></div></div>
+            <div class="stage-block"><h4>放行条件与失败模式</h4><ul><li>提交包的零件号、版本、样件批次、生产地点和数据相互一致，PSW 结论与实际证据一致。</li><li>客户批准状态应明确为批准、临时批准或拒绝；临时批准必须有到期日、遏制和关闭计划。</li><li>客户特殊要求可能要求 PSO、Run at Rate、额外软件或网络安全证据；不能用“AIAG 标准没要求”拒绝客户要求。</li></ul></div>
+          </div>
+        </article>
+
+        <article class="stage" id="sop">
+          <div class="stage-head"><div class="stage-no">06<br>SOP</div><div class="stage-title"><h3>量产启动：把开发项目交给日常运营，但保留一段安全缓冲。</h3><p>SOP 是从“项目交付”切换到“持续供货”的运行门；最关键的是安全投产、稳定爬坡和异常升级。</p></div><span class="gate">可稳定交付</span></div>
+          <div class="stage-grid">
+            <div class="stage-block"><h4>做什么</h4><p>按已批准的零件、软件、工艺和控制计划生产；实施 Safe Launch / Early Production Containment，监控缺陷、直通率、停线、节拍、交付、版本和现场问题；以日 / 周节奏完成爬坡。</p></div>
+            <div class="stage-block"><h4>案例落地：T‑BOX 量产运行</h4><ul><li>入料验证：SA515M 与 AG55xQ 的批次、标签、固件、校准与供应商变更状态。</li><li>工艺防错：SMT、射频测试、烧录、密钥注入、CAN/以太网测试、整机老化、序列号和云端激活。</li><li>运营指标：一次合格率、现场失效率、通信注册成功率、OTA 成功率、误报率、返修率和供应商交付。</li></ul></div>
+            <div class="stage-block"><h4>关键交付物</h4><div class="deliverables"><span class="deliverable">安全投产计划</span><span class="deliverable">量产控制计划</span><span class="deliverable">工位 / 检测记录</span><span class="deliverable">批次与序列号追溯</span><span class="deliverable">版本与配置基线</span><span class="deliverable">产能 / 节拍日报</span><span class="deliverable">异常升级清单</span><span class="deliverable">运营交接包</span></div></div>
+            <div class="stage-block"><h4>放行条件与失败模式</h4><ul><li>按客户定义的指标连续稳定运行，安全投产退出条件有数据而非口头承诺。</li><li>任何芯片 PCN、模组固件、网络参数或云端 API 变化都必须进入变更评估和再批准流程。</li><li>避免把 SOP 当作“首批货发出”；量产控制、备件策略、软件发布和现场服务若未就绪，项目仍未真正落地。</li></ul></div>
+          </div>
+        </article>
+
+        <article class="stage" id="eop">
+          <div class="stage-head"><div class="stage-no">07<br>EOP</div><div class="stage-title"><h3>项目结束：结束生产，不结束责任。</h3><p>EOP 是生命周期治理的最后一道门，目标是零件、备件、工具、软件和数据有序退出，避免停产造成断供与合规风险。</p></div><span class="gate">有序退出</span></div>
+          <div class="stage-grid">
+            <div class="stage-block"><h4>做什么</h4><p>接收 OEM 停产通知和最后需求预测，制定最后生产、库存消化、替代料、售后备件、工具保管、资料归档、供应商退出、软件支持和网络安全处置计划。</p></div>
+            <div class="stage-block"><h4>案例落地：5G T‑BOX 的 EOP</h4><ul><li>芯片：确认 SA515M 生命周期、最后采购、替代芯片评估和是否需要重新 DV/PV/PPAP。</li><li>模组：冻结 AG55xQ 最后版本，保留固件、校准、认证、密钥与维修刷写能力。</li><li>整车：管理最后一批车、备件需求、云服务接口、证书 / 密钥生命周期、数据保留与删除。</li></ul></div>
+            <div class="stage-block"><h4>关键交付物</h4><div class="deliverables"><span class="deliverable">EOP 通知与最后需求</span><span class="deliverable">最后采购 / 库存报告</span><span class="deliverable">备件与售后计划</span><span class="deliverable">工具 / 检具处置记录</span><span class="deliverable">软件与安全归档</span><span class="deliverable">替代料与变更评估</span><span class="deliverable">质量数据与经验教训</span><span class="deliverable">项目关闭报告</span></div></div>
+            <div class="stage-block"><h4>放行条件与失败模式</h4><ul><li>最后一批产品、在制品、原材料、备件和供应商开放订单有可核对的账。</li><li>不得未经客户书面确认擅自报废客户工具、关键材料或技术资料；售后供货义务要有合同依据。</li><li>避免只看库存金额，不看网络连接、OTA、证书、云端和维修工具的长期可用性。</li></ul></div>
+          </div>
+        </article>
+      </section>
+
+      <section id="handoff" aria-labelledby="handoff-title">
+        <div class="section-head"><div><p class="eyebrow">交接设计</p><h2 id="handoff-title">上一阶段的输出，必须成为下一阶段的输入。</h2></div><p class="section-intro">如果交接物没有版本、责任人和证据位置，项目会在每个门重新争论“到底按哪一版做”。</p></div>
+        <div class="table-wrap">
+          <table class="handoff-table">
+            <thead><tr><th>前一阶段</th><th>必须交给下一阶段的基线</th><th>下一阶段首先检查什么</th></tr></thead>
+            <tbody>
+              <tr><td>RFQ → 定点</td><td>报价假设、成本 / 产能边界、供应商方案、风险和偏差。</td><td>定点是否覆盖全部承诺？哪些要求仍待澄清？谁承担不可控的芯片和网络风险？</td></tr>
+              <tr><td>定点 → DV</td><td>SOW、零件 / 软件版本、需求矩阵、接口、DVP&R、责任和里程碑。</td><td>需求是否可测试？SA515M—AG55xQ—T‑BOX 的接口边界是否有单一责任人？</td></tr>
+              <tr><td>DV → PV</td><td>设计记录、已关闭关键 DFMEA 风险、DVP&R 结果、量产意图差异清单。</td><td>试生产样件是否与验证通过的设计一致？量产天线、工装、固件和参数是否已纳入？</td></tr>
+              <tr><td>PV → PPAP</td><td>真实生产批次、流程图、PFMEA、控制计划、MSA、能力、性能和问题关闭证据。</td><td>数据是否来自规定的生产速率？提交包中的批次、版本、工厂和零件号是否一致？</td></tr>
+              <tr><td>PPAP → SOP</td><td>客户批准的 PSW、偏差 / 临时批准状态、批准版本和安全投产条件。</td><td>批准是否覆盖当前软件和硬件？现场是否具备已批准的工艺、检测、包装和物流能力？</td></tr>
+              <tr><td>SOP → EOP</td><td>量产质量、交付、保修、变更、库存、备件、生命周期和云端运行数据。</td><td>停产是否会造成断供、售后缺件、芯片过时、证书失效或软件服务中断？</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="section-head" style="margin-top:52px"><div><p class="eyebrow">责任矩阵</p><h2>四层供应链，四种“完成”。</h2></div><p class="section-intro">供应商层级越高，交付物越接近整车和客户体验；但下游不能把上游的认证或芯片等级直接当作系统合格。</p></div>
+        <div class="table-wrap">
+          <table class="raci-table">
+            <thead><tr><th>主体</th><th>主要负责</th><th>必须提供给下游的证据</th><th>不能替下游证明的事情</th></tr></thead>
+            <tbody>
+              <tr><td>高通 / 芯片供应商</td><td>芯片规格、参考设计、软件支持、PCN、生命周期、芯片级质量和供货承诺。</td><td>数据手册、应用说明、芯片质量 / 变更资料、生命周期与支持窗口。</td><td>不能替 T‑BOX 证明天线布局、整车 EMC、生产节拍和整车网络体验。</td></tr>
+              <tr><td>移远 / 模组供应商</td><td>模组硬件、射频、固件、驱动、认证支持、校准、技术支持和模组级变更。</td><td>AG55xQ 规格、硬件设计资料、AT / 驱动、认证、DFOTA、质量与 PCN 资料。</td><td>不能替 Tier1 证明 T‑BOX 主板、电源、装配、烧录、密钥和整车接口。</td></tr>
+              <tr><td>Tier1 / T‑BOX 集成商</td><td>系统架构、软硬件集成、天线、车载接口、生产过程、测试、PPAP 和交付。</td><td>系统需求矩阵、DFMEA/PFMEA、DVP&R、控制计划、PV 数据、PPAP、量产追溯。</td><td>不能用模组的“车规级”宣传替代整机与整车验证，也不能单方面改动客户需求。</td></tr>
+              <tr><td>OEM / 整车厂</td><td>整车需求、客户特殊要求、车型计划、整车集成、最终批准、售后和 EOP 决策。</td><td>SOR、接口和法规要求、客户批准状态、车型预测、EOP 通知及服务策略。</td><td>不能只以整车试验结果替代供应商过程能力和 PPAP 证据。</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="requirements" aria-labelledby="requirements-title">
+        <div class="section-head"><div><p class="eyebrow">需求追溯示例</p><h2 id="requirements-title">把“通信要稳定”写成可验证条款。</h2></div><p class="section-intro">下面是 T‑BOX 项目的示例条款，不是任何特定 OEM 的正式规范。真正项目要把频段、地域、法规、阈值和试验方法替换为客户签发版本。</p></div>
+        <div class="table-wrap">
+          <table class="req-table">
+            <thead><tr><th>需求编号</th><th>可验证要求示例</th><th>验证阶段</th><th>证据与放行判断</th></tr></thead>
+            <tbody>
+              <tr><td>REQ-CELL-001</td><td>在指定国家 / 地区支持客户要求的 5G SA/NSA 频段，并在无 5G 覆盖时按策略回落到 LTE。</td><td>DV + PV + 整车</td><td>射频一致性、运营商网络矩阵、跨网回落、弱覆盖道路和整车天线报告；不可用“峰值速率”替代覆盖验证。</td></tr>
+              <tr><td>REQ-POS-002</td><td>在规定开阔、城市峡谷和遮挡场景下提供 GNSS 定位与时间同步，必要时支持双频、DR 或 RTK。</td><td>DV + PV</td><td>定位误差、首次定位时间、丢星恢复、组合导航和天线安装误差报告；必须绑定样件和固件版本。</td></tr>
+              <tr><td>REQ-EMC-003</td><td>T‑BOX 在整车电源、ESD、辐射与传导干扰条件下不发生失控、误复位或不可恢复掉线。</td><td>DV + PV + 法规</td><td>预扫描 → 实验室 → 整车 EMC；失效时提供根因、整改、回归测试和客户偏差批准。</td></tr>
+              <tr><td>REQ-SAFE-004</td><td>启动、刷写、密钥注入、远程升级和诊断过程具备客户定义的身份、完整性和回滚保护。</td><td>DV + PV + 软件批准</td><td>安全架构、Secure Boot / OTA 证据、异常断电与回滚测试、密钥管理和版本追溯；不能只提交“支持安全启动”的宣传页。</td></tr>
+              <tr><td>REQ-MFG-005</td><td>量产线能够对每台 T‑BOX 完成烧录、校准、联网、接口和最终测试，并将芯片、模组、固件和车辆 VIN 关联。</td><td>PV + PPAP + SOP</td><td>工位记录、序列号追溯、MSA、能力研究、测试节拍、异常隔离和数据留存策略。</td></tr>
+              <tr><td>REQ-LIFE-006</td><td>在项目 EOP 后维持约定期限的备件、固件、诊断工具和安全支持，或经过客户批准的替代方案。</td><td>EOP</td><td>生命周期承诺、最后采购、库存、备件预测、替代料验证、云服务与证书策略、关闭报告。</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="checklist" aria-labelledby="checklist-title">
+        <div class="section-head"><div><p class="eyebrow">立即落地</p><h2 id="checklist-title">项目经理今天就可以开这张表。</h2></div><p class="section-intro">把“有没有资料”改成“证据是否能支持放行”。每一行都应有责任人、计划完成日、当前状态和证据链接。</p></div>
+        <ul class="checklist">
+          <li>把 RFQ 的客户要求拆成需求编号、版本、验证方法、责任主体和报价影响。</li>
+          <li>在定点文件中锁定芯片、模组、T‑BOX、工厂、区域变体、SOP/EOP 与售后边界。</li>
+          <li>建立 SA515M → AG55xQ → T‑BOX → 整车的接口控制文件，所有版本可追溯。</li>
+          <li>让 DVP&R 覆盖电气、射频、热、机械、EMC、GNSS、网络、诊断和安全，而不只覆盖功能演示。</li>
+          <li>在 PV 前冻结生产意图物料、软件、天线、工装、测试设备、人员和工艺参数。</li>
+          <li>把 DFMEA 的高风险项落实到 PFMEA、控制计划和工位防错，形成证据链。</li>
+          <li>以真实生产批次做 MSA、初始能力、节拍、追溯、包装和 PPAP 数据，拒绝“实验室数据冒充量产数据”。</li>
+          <li>在 PSW 上明确批准、临时批准或拒绝，临时批准必须有遏制、到期日和关闭责任。</li>
+          <li>SOP 后设置安全投产与爬坡指标，监控一次合格率、现场失效、OTA、网络注册、停线和交付。</li>
+          <li>把芯片 PCN、模组固件、云端 API、证书、密钥、替代料和网络退网纳入变更评估。</li>
+          <li>EOP 前完成最后采购、库存消化、备件、工具、软件、数据与安全归档，并得到客户书面关闭。</li>
+          <li>每个阶段评审只允许三种结论：放行、带条件放行（有期限和遏制）、不放行；不接受没有证据的口头绿灯。</li>
+        </ul>
+      </section>
+
+      <section id="sources" aria-labelledby="sources-title">
+        <div class="section-head"><div><p class="eyebrow">来源与口径</p><h2 id="sources-title">标准给框架，客户给边界，数据给结论。</h2></div><p class="section-intro">本页是面向学习与项目沟通的行业通用研究，不替代购买的标准原文、客户特殊要求、项目合同、法规或认证机构的正式判定。</p></div>
+        <ol class="source-list">
+          <li><a href="https://www.aiag.org/training-and-resources/manuals/details/APQP-3" target="_blank" rel="noopener">AIAG · Advanced Product Quality Planning（APQP）第 3 版</a><small>2024 年版页面，说明新版的采购、变更、指标、风险缓解、门禁、追溯与 Control Plan 独立手册变化。</small></li>
+          <li><a href="https://www.aiag.org/training-and-resources/manuals/details/PPAP-4" target="_blank" rel="noopener">AIAG · Production Part Approval Process（PPAP）第 4 版</a><small>说明 PPAP 的目的：证明实际生产运行能持续满足工程设计记录和规格要求。</small></li>
+          <li><a href="https://www.aiag.org/training-and-resources/manuals" target="_blank" rel="noopener">AIAG · Manual and Guidelines</a><small>用于核对 APQP、Control Plan、FMEA、MSA、SPC、PPAP 与 IATF 16949 等核心工具的官方出版信息。</small></li>
+          <li><a href="https://www.iatfglobaloversight.org/oem-requirements/customer-specific-requirements/" target="_blank" rel="noopener">International Automotive Task Force · Customer-Specific Requirements</a><small>客户特殊要求会覆盖通用 AIAG / IATF 解释，必须在项目启动时确认适用 OEM 版本。</small></li>
+          <li><a href="https://www.quectel.com.cn/product/ag55xq-series" target="_blank" rel="noopener">移远通信 · 5G &amp; C‑V2X AG55xQ 系列</a><small>官方中文产品页：车规 5G、SA/NSA、温度范围、T‑Box 应用、APQP/PPAP、AEC‑Q100 与 SA515M 芯片信息。</small></li>
+          <li><a href="https://www.qualcomm.com/automotive/solutions/connectivity-positioning/products/snapdragon-auto-5g-modem-rf" target="_blank" rel="noopener">Qualcomm · Snapdragon Auto 5G Modem‑RF</a><small>用于理解汽车级 5G 模组、C‑V2X、DSDA、GNSS、SA/NSA 和汽车温度 / RF 前端边界。</small></li>
+          <li><a href="https://www.qualcomm.com/news/onq/2020/09/driving-toward-telematic-application-development" target="_blank" rel="noopener">Qualcomm · Driving toward telematic application development</a><small>官方文章列出 SA515M 作为汽车 5G 独立调制解调器示例；具体芯片文档仍应以项目授权资料为准。</small></li>
+          <li><a href="https://www.quectel.com/product/5g-c-v2x-ag57xq-automotive-module/" target="_blank" rel="noopener">移远通信 · AG57xQ automotive module series</a><small>作为后续平台对比入口；产品代际、芯片平台和认证状态不能与本页 AG55xQ 案例直接互换。</small></li>
+          <li><a href="https://www.forvia.com/sites/default/files/2024-02/Supplier%20Logistics%20Manual%20for%20%20the%20United%20States.pdf" target="_blank" rel="noopener">FORVIA · Supplier Logistics Manual</a><small>EOP 章节示例：停产通知、OEM 预测、库存隔离、阶段成本、报废和结束确认。</small></li>
+        </ol>
+      </section>
+
+      <div class="conclusion"><p class="eyebrow">核心结论</p><p>真正成熟的汽车零部件项目，不是把 RFQ 变成一张订单，而是把每次承诺都转化为下一阶段可复用、可审计、可追溯的证据；谁能把芯片生命周期、模组版本、T‑BOX 制造和整车服务连成一条不断链的证据链，谁才真正具备从定点走到 EOP 的交付能力。</p></div>
+      <footer>本页为 AI-Research-Atlas 汽车专题研究 · 研究日期 2026-08-11 · 术语按行业通用口径整理，项目执行以客户正式文件为准。</footer>
+    </main>
+  </div>
+  <button class="backtop" type="button" aria-label="返回顶部">↑</button>
+  <script>
+    const progress = document.querySelector('.progress');
+    const backtop = document.querySelector('.backtop');
+    const updateReadingState = () => {
+      const scrollable = document.documentElement.scrollHeight - window.innerHeight;
+      progress.style.width = `${scrollable > 0 ? (window.scrollY / scrollable) * 100 : 0}%`;
+      backtop.classList.toggle('show', window.scrollY > 420);
+    };
+    window.addEventListener('scroll', updateReadingState, { passive: true });
+    backtop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+    updateReadingState();
+  </script>
+</body>
+</html>

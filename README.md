@@ -13,6 +13,10 @@
 | **`03-code/`** | 轻量实验代码（如 Toy Example），验证笔记中的关键推导 |
 | **`04-resources/`** | 外部优质课程、博客、数据集的索引与评价 |
 | **`05-journals/`** | 阶段性学习日志，记录思考过程与方向调整 |
+| **`06-ai-automotive/`** | AI 汽车、智能座舱、车载场景与汽车全价值链人工智能应用研究 |
+| **`02-concepts/knowledge-graph-ontology/`** | 知识图谱 × 本体论 · 从零到一：核心概念、工作原理、二者关系与汽车领域全案例 |
+| **`02-concepts/ai-skills/`** | AI-Skills 制作 · 从零到一：Agent Skills 概念、SKILL.md 规范与命名规则、制作方法论，并附专利 Skills 全案例 |
+| **`04-resources/wechat-llm-series/`** | 微信公众号「码海寻道」《大模型知识与部署》系列 38 篇精读笔记与专辑总览 |
 
 ## 🧭 使用原则
 
@@ -22,9 +26,12 @@
 
 ## 📅 更新记录
 
+- **2026-08**：新增 `06-ai-automotive/` 专题目录与 AI 汽车深度研究网页。
+- **2026-08**：新建 `02-concepts/knowledge-graph-ontology/` 概念精读（知识图谱 × 本体论从零到一）。
+- **2026-08**：新建 `02-concepts/ai-skills/` 概念精读（AI-Skills 制作从零到一，含专利 Skills 全案例）。
+- **2026-08**：新建 `04-resources/wechat-llm-series/` 资源索引（微信公众号「码海寻道」《大模型知识与部署》系列 38 篇精读 + 1 个专辑总览）。
 - **2026-07**：仓库初始化，确立 `Atlas` 架构。
 
 ## 📜 License
 
-本仓库代码部分采用 [MIT License](LICENSE)；
-笔记与文字内容保留所有权，引用请注明出处。
+本仓库代码部分采用 [MIT License](LICENSE)；笔记与文字内容保留所有权，引用请注明出处。	

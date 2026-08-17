@@ -1,0 +1,870 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="AI-Research-Atlas 研究导航：集中浏览人工智能、汽车、数据与数智化研究成果。">
+  <title>AI 研究图谱 · 导航</title>
+  <style>
+    :root {
+      --paper: #ffffff;
+      --soft: #f5f7fa;
+      --soft-blue: #edf4ff;
+      --ink: #111318;
+      --body: #343a46;
+      --muted: #68707e;
+      --line: #dfe3e9;
+      --line-strong: #bac2ce;
+      --blue: #0b5bd3;
+      --blue-dark: #08459f;
+      --max: 1180px;
+      --sans: "Microsoft YaHei", "PingFang SC", "Noto Sans CJK SC", system-ui, -apple-system, sans-serif;
+      --mono: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+    }
+
+    * { box-sizing: border-box; }
+
+    html {
+      scroll-behavior: smooth;
+      color-scheme: light;
+    }
+
+    body {
+      min-width: 320px;
+      margin: 0;
+      overflow-x: hidden;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: var(--sans);
+      font-size: 16px;
+      line-height: 1.7;
+      text-rendering: optimizeLegibility;
+    }
+
+    button,
+    input,
+    select { font: inherit; }
+
+    a {
+      color: inherit;
+      text-underline-offset: 4px;
+    }
+
+    :focus-visible {
+      outline: 3px solid var(--blue);
+      outline-offset: 3px;
+    }
+
+    .skip-link {
+      position: fixed;
+      z-index: 100;
+      top: 12px;
+      left: 12px;
+      padding: 9px 13px;
+      transform: translateY(-160%);
+      background: var(--blue);
+      color: #fff;
+    }
+
+    .skip-link:focus { transform: none; }
+
+    .wrap {
+      width: min(calc(100% - 48px), var(--max));
+      margin-inline: auto;
+    }
+
+    .site-header {
+      border-bottom: 1px solid var(--line);
+    }
+
+    .topline {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 62px;
+      gap: 24px;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 11px;
+      text-decoration: none;
+      font-weight: 800;
+      letter-spacing: -.02em;
+    }
+
+    .brand-mark {
+      display: grid;
+      grid-template-columns: repeat(2, 6px);
+      gap: 3px;
+      width: 19px;
+      height: 19px;
+      align-content: center;
+      justify-content: center;
+      border: 1px solid var(--blue);
+    }
+
+    .brand-mark i {
+      width: 6px;
+      height: 6px;
+      background: var(--blue);
+    }
+
+    .brand-mark i:nth-child(2),
+    .brand-mark i:nth-child(3) { background: transparent; }
+
+    .repo-link {
+      color: var(--muted);
+      font-size: 13px;
+      text-decoration-color: var(--line-strong);
+    }
+
+    .hero {
+      padding: clamp(54px, 8vw, 96px) 0 52px;
+    }
+
+    .eyebrow {
+      margin: 0 0 14px;
+      color: var(--blue);
+      font: 800 12px/1.4 var(--mono);
+      letter-spacing: .12em;
+    }
+
+    h1,
+    h2,
+    h3,
+    p { overflow-wrap: anywhere; }
+
+    h1 {
+      max-width: 920px;
+      margin: 0;
+      font-size: clamp(42px, 7vw, 82px);
+      line-height: 1.06;
+      letter-spacing: -.055em;
+    }
+
+    h1 span { color: var(--blue); }
+
+    .hero-copy {
+      display: grid;
+      grid-template-columns: minmax(0, 1.3fr) minmax(280px, .7fr);
+      gap: clamp(36px, 7vw, 94px);
+      align-items: end;
+      margin-top: 31px;
+    }
+
+    .lead {
+      max-width: 720px;
+      margin: 0;
+      color: var(--body);
+      font-size: clamp(17px, 2vw, 21px);
+    }
+
+    .hero-note {
+      margin: 0;
+      padding-left: 17px;
+      border-left: 3px solid var(--blue);
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .atlas-line {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      margin-top: 54px;
+      border-top: 1px solid var(--blue);
+    }
+
+    .atlas-line div {
+      position: relative;
+      padding: 18px 18px 0 0;
+    }
+
+    .atlas-line div::before {
+      content: "";
+      position: absolute;
+      top: -5px;
+      left: 0;
+      width: 9px;
+      height: 9px;
+      background: var(--paper);
+      border: 2px solid var(--blue);
+      border-radius: 50%;
+    }
+
+    .atlas-line strong {
+      display: block;
+      font-size: 14px;
+    }
+
+    .atlas-line span {
+      display: block;
+      margin-top: 2px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .workspace {
+      border-top: 1px solid var(--line-strong);
+      padding: 54px 0 84px;
+    }
+
+    .section-head {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 24px;
+      align-items: end;
+      margin-bottom: 28px;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: clamp(30px, 4vw, 48px);
+      line-height: 1.18;
+      letter-spacing: -.04em;
+    }
+
+    .result-status {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .result-status strong {
+      color: var(--blue);
+      font-family: var(--mono);
+      font-size: 20px;
+    }
+
+    .controls {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 210px;
+      gap: 14px;
+      padding: 20px 0 24px;
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .search-wrap { position: relative; }
+
+    .search-wrap label,
+    .select-wrap label {
+      display: block;
+      margin-bottom: 7px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    input[type="search"],
+    select {
+      width: 100%;
+      min-height: 46px;
+      border: 1px solid var(--line-strong);
+      border-radius: 0;
+      background: #fff;
+      color: var(--ink);
+    }
+
+    input[type="search"] { padding: 10px 44px 10px 13px; }
+    select { padding: 10px 36px 10px 13px; }
+
+    input[type="search"]:hover,
+    select:hover { border-color: var(--blue); }
+
+    .clear-search {
+      position: absolute;
+      right: 8px;
+      bottom: 8px;
+      width: 30px;
+      height: 30px;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+    }
+
+    .clear-search[hidden] { display: none; }
+
+    .direction-filter {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 18px 0 30px;
+    }
+
+    .filter-button {
+      min-height: 38px;
+      padding: 7px 13px;
+      border: 1px solid var(--line-strong);
+      background: #fff;
+      color: var(--body);
+      cursor: pointer;
+    }
+
+    .filter-button:hover { border-color: var(--blue); }
+
+    .filter-button[aria-pressed="true"] {
+      border-color: var(--blue);
+      background: var(--blue);
+      color: #fff;
+    }
+
+    .content-grid {
+      display: grid;
+      grid-template-columns: 220px minmax(0, 1fr);
+      gap: clamp(36px, 6vw, 76px);
+    }
+
+    .directory-map {
+      align-self: start;
+      position: sticky;
+      top: 24px;
+    }
+
+    .directory-map h3 {
+      margin: 0 0 14px;
+      color: var(--muted);
+      font-size: 12px;
+      letter-spacing: .08em;
+    }
+
+    .directory-map ol {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      border-top: 1px solid var(--ink);
+    }
+
+    .directory-map li {
+      display: grid;
+      grid-template-columns: 26px 1fr auto;
+      gap: 8px;
+      align-items: baseline;
+      padding: 11px 0;
+      border-bottom: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .directory-map .num {
+      color: var(--blue);
+      font-family: var(--mono);
+      font-size: 10px;
+    }
+
+    .directory-map b {
+      color: var(--ink);
+      font-family: var(--mono);
+      font-size: 11px;
+    }
+
+    .results {
+      min-width: 0;
+      border-top: 2px solid var(--ink);
+    }
+
+    .research-item {
+      display: grid;
+      grid-template-columns: 118px minmax(0, 1fr) 28px;
+      gap: 24px;
+      padding: 30px 0 32px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .item-date {
+      color: var(--muted);
+      font: 12px/1.5 var(--mono);
+    }
+
+    .item-category {
+      display: block;
+      margin-top: 7px;
+      color: var(--blue);
+      font-family: var(--sans);
+      font-weight: 800;
+    }
+
+    .item-main h3 {
+      margin: 0;
+      font-size: clamp(22px, 3vw, 31px);
+      line-height: 1.3;
+      letter-spacing: -.025em;
+    }
+
+    .item-main h3 a {
+      text-decoration: none;
+    }
+
+    .item-main h3 a:hover {
+      color: var(--blue);
+      text-decoration: underline;
+      text-decoration-thickness: 2px;
+    }
+
+    .item-summary {
+      max-width: 760px;
+      margin: 12px 0 0;
+      color: var(--body);
+      font-size: 15px;
+    }
+
+    .item-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px 16px;
+      margin-top: 17px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .item-meta span:first-child {
+      font-family: var(--mono);
+      overflow-wrap: anywhere;
+    }
+
+    .keywords {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 16px;
+    }
+
+    .keyword {
+      padding: 3px 7px;
+      background: var(--soft);
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .item-arrow {
+      padding-top: 4px;
+      color: var(--blue);
+      font-size: 22px;
+      text-decoration: none;
+    }
+
+    .empty {
+      padding: 62px 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .empty strong {
+      display: block;
+      font-size: 20px;
+    }
+
+    .empty p {
+      margin: 8px 0 0;
+      color: var(--muted);
+    }
+
+    .principles {
+      padding: 70px 0;
+      background: var(--soft);
+      border-top: 1px solid var(--line);
+    }
+
+    .principle-grid {
+      display: grid;
+      grid-template-columns: .75fr repeat(3, 1fr);
+      gap: 0;
+      border-top: 1px solid var(--ink);
+    }
+
+    .principle-grid > * {
+      min-width: 0;
+      margin: 0;
+      padding: 24px 24px 5px 0;
+      border-right: 1px solid var(--line-strong);
+    }
+
+    .principle-grid > *:not(:first-child) { padding-left: 24px; }
+    .principle-grid > *:last-child { border-right: 0; }
+
+    .principle-grid h2 {
+      font-size: 25px;
+      letter-spacing: -.025em;
+    }
+
+    .principle-grid strong {
+      display: block;
+      margin-bottom: 7px;
+      color: var(--blue);
+      font-size: 14px;
+    }
+
+    .principle-grid p {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    footer {
+      padding: 28px 0 40px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .footer-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 24px;
+    }
+
+    @media (max-width: 820px) {
+      .wrap { width: min(calc(100% - 36px), var(--max)); }
+      .hero-copy { grid-template-columns: 1fr; gap: 24px; }
+      .atlas-line { grid-template-columns: repeat(2, 1fr); gap: 24px 0; }
+      .content-grid { grid-template-columns: 1fr; }
+      .directory-map { position: static; }
+      .directory-map ol { display: grid; grid-template-columns: repeat(2, 1fr); }
+      .directory-map li:nth-child(odd) { padding-right: 16px; }
+      .directory-map li:nth-child(even) { padding-left: 16px; border-left: 1px solid var(--line); }
+      .principle-grid { grid-template-columns: 1fr 1fr; }
+      .principle-grid > * { border-bottom: 1px solid var(--line-strong); }
+      .principle-grid > *:nth-child(2n) { border-right: 0; }
+      .principle-grid > *:nth-child(3) { padding-left: 0; }
+    }
+
+    @media (max-width: 600px) {
+      .topline { min-height: 56px; }
+      .repo-link { font-size: 12px; }
+      .hero { padding-top: 48px; }
+      h1 { font-size: clamp(38px, 14vw, 56px); }
+      .atlas-line { grid-template-columns: 1fr; border-top: 0; border-left: 1px solid var(--blue); margin-left: 5px; }
+      .atlas-line div { padding: 0 0 22px 22px; }
+      .atlas-line div::before { top: 5px; left: -5px; }
+      .section-head { grid-template-columns: 1fr; gap: 10px; }
+      .controls { grid-template-columns: 1fr; }
+      .directory-map ol { grid-template-columns: 1fr; }
+      .directory-map li:nth-child(odd),
+      .directory-map li:nth-child(even) { padding-inline: 0; border-left: 0; }
+      .research-item { grid-template-columns: 1fr 24px; gap: 13px 10px; }
+      .item-date { grid-column: 1 / -1; }
+      .item-main { grid-column: 1; }
+      .item-arrow { grid-column: 2; grid-row: 2; }
+      .principle-grid { grid-template-columns: 1fr; }
+      .principle-grid > * { padding: 20px 0; border-right: 0; }
+      .principle-grid > *:not(:first-child),
+      .principle-grid > *:nth-child(3) { padding-left: 0; }
+      .footer-row { display: block; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after {
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .01ms !important;
+      }
+    }
+
+    @media print {
+      .controls,
+      .direction-filter,
+      .repo-link { display: none; }
+      .wrap { width: 100%; }
+      .hero { padding: 24px 0; }
+      .directory-map { position: static; }
+      body { font-size: 11pt; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到研究目录</a>
+
+  <header class="site-header">
+    <div class="wrap topline">
+      <a class="brand" href="index.html" aria-label="AI 研究图谱首页">
+        <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+        <span>AI 研究图谱</span>
+      </a>
+      <a class="repo-link" href="README.md">阅读仓库说明</a>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="wrap">
+        <p class="eyebrow">AI-RESEARCH-ATLAS / 研究总入口</p>
+        <h1 id="hero-title">把分散的研究，连成一张<span>可追踪的知识图谱</span>。</h1>
+        <div class="hero-copy">
+          <p class="lead">这里集中导航人工智能、汽车、数据与数智化研究成果。每个页面都以问题为起点，以证据为支撑，并通过关联阅读逐步形成知识网络。</p>
+          <p class="hero-note">当前导航登记 <strong id="heroCount">2</strong> 篇研究页面。导航清单由仓库维护规则同步更新，不依赖服务器扫描。</p>
+        </div>
+        <div class="atlas-line" aria-label="四条研究主线">
+          <div><strong>人工智能</strong><span>原理、模型、智能体与应用</span></div>
+          <div><strong>汽车智能</strong><span>座舱、驾驶与产业链</span></div>
+          <div><strong>数据与治理</strong><span>数据集、空间与可信流通</span></div>
+          <div><strong>数智化</strong><span>组织、流程与价值重构</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="workspace" aria-labelledby="catalog-title">
+      <div class="wrap">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">研究目录</p>
+            <h2 id="catalog-title">从问题出发，找到下一篇。</h2>
+          </div>
+          <p class="result-status" aria-live="polite"><strong id="resultCount">2</strong> 篇符合条件</p>
+        </div>
+
+        <div class="controls" aria-label="研究页面筛选">
+          <div class="search-wrap">
+            <label for="search">搜索标题、摘要或关键词</label>
+            <input id="search" type="search" placeholder="例如：知识图谱、智能座舱、可信数据空间" autocomplete="off">
+            <button class="clear-search" id="clearSearch" type="button" aria-label="清除搜索" hidden>×</button>
+          </div>
+          <div class="select-wrap">
+            <label for="category">内容类型</label>
+            <select id="category">
+              <option value="全部">全部类型</option>
+              <option value="论文精读">论文精读</option>
+              <option value="概念精读">概念精读</option>
+              <option value="专题研究">专题研究</option>
+              <option value="资源索引">资源索引</option>
+              <option value="学习日志">学习日志</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="direction-filter" aria-label="按研究方向筛选">
+          <button class="filter-button" type="button" data-direction="全部" aria-pressed="true">全部方向</button>
+          <button class="filter-button" type="button" data-direction="人工智能" aria-pressed="false">人工智能</button>
+          <button class="filter-button" type="button" data-direction="汽车" aria-pressed="false">汽车</button>
+          <button class="filter-button" type="button" data-direction="数据" aria-pressed="false">数据与治理</button>
+          <button class="filter-button" type="button" data-direction="数智化" aria-pressed="false">数智化</button>
+        </div>
+
+        <div class="content-grid">
+          <aside class="directory-map" aria-labelledby="map-title">
+            <h3 id="map-title">仓库坐标</h3>
+            <ol>
+              <li><span class="num">01</span><span>论文精读</span><b id="count-papers">0</b></li>
+              <li><span class="num">02</span><span>核心概念</span><b id="count-concepts">1</b></li>
+              <li><span class="num">03</span><span>轻量实验</span><b id="count-code">0</b></li>
+              <li><span class="num">04</span><span>资源索引</span><b id="count-resources">0</b></li>
+              <li><span class="num">05</span><span>学习日志</span><b id="count-journals">0</b></li>
+              <li><span class="num">06</span><span>汽车智能</span><b id="count-auto">1</b></li>
+            </ol>
+          </aside>
+
+          <div class="results" id="results">
+            <article class="research-item">
+              <div class="item-date"><time datetime="2026-08-05">2026.08.05</time><span class="item-category">概念精读</span></div>
+              <div class="item-main">
+                <h3><a href="02-concepts/knowledge-graph-ontology/知识图谱×本体论-概念精读-20260805.html">知识图谱 × 本体论：汽车领域从建模到落图</a></h3>
+                <p class="item-summary">从本体建模到汽车领域知识图谱生成的完整教程，覆盖 RDF、OWL、SHACL、查询、推理与工程治理。</p>
+                <div class="item-meta"><span>02-concepts/knowledge-graph-ontology</span><span>人工智能 · 汽车</span></div>
+                <div class="keywords"><span class="keyword">知识图谱</span><span class="keyword">本体论</span><span class="keyword">汽车</span><span class="keyword">语义建模</span></div>
+              </div>
+              <a class="item-arrow" href="02-concepts/knowledge-graph-ontology/知识图谱×本体论-概念精读-20260805.html" aria-label="打开：知识图谱 × 本体论：汽车领域从建模到落图">↗</a>
+            </article>
+            <article class="research-item">
+              <div class="item-date"><time datetime="2026-08-11">2026.08.11</time><span class="item-category">专题研究</span></div>
+              <div class="item-main">
+                <h3><a href="06-ai-automotive/汽车零部件开发-RFQ定点DV-PV-PPAP-SOP-EOP-专题研究-20260811.html">汽车零部件开发：RFQ、定点、DV、PV、PPAP、SOP、EOP</a></h3>
+                <p class="item-summary">以高通 SA515M、移远 AG55xQ、Tier1 T-BOX 与整车集成为例，拆解 APQP 产品质量先期策划中的七个关键节点、交付物、责任与放行条件。</p>
+                <div class="item-meta"><span>06-ai-automotive</span><span>汽车 · 人工智能</span></div>
+                <div class="keywords"><span class="keyword">APQP</span><span class="keyword">PPAP</span><span class="keyword">T-BOX</span><span class="keyword">供应链</span></div>
+              </div>
+              <a class="item-arrow" href="06-ai-automotive/汽车零部件开发-RFQ定点DV-PV-PPAP-SOP-EOP-专题研究-20260811.html" aria-label="打开：汽车零部件开发：RFQ、定点、DV、PV、PPAP、SOP、EOP">↗</a>
+            </article>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="principles" aria-labelledby="principle-title">
+      <div class="wrap principle-grid">
+        <h2 id="principle-title">这张图谱如何生长</h2>
+        <p><strong>先理解，再记录</strong>每篇成果都应是经过比较、验证和重述后的知识，而不是原文搬运。</p>
+        <p><strong>先证据，再判断</strong>事实、观点、推断与预测分开表达，重要结论尽量交叉验证。</p>
+        <p><strong>一个主题，一个主文件</strong>交叉领域通过相关研究相连，避免在多个目录复制相同内容。</p>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap footer-row">
+      <span>AI-Research-Atlas · 本地研究知识库</span>
+      <span>新增研究 HTML 后，请同步更新本页的 PAGE_INDEX 清单。</span>
+    </div>
+  </footer>
+
+  <script>
+    // 静态 HTML 无法遍历本地文件系统。新增、移动或删除研究页面时，请同步维护此清单。
+    const PAGE_INDEX = [
+      {
+        title: "深度学习与多模态输入：驾驶员监测与座舱意图识别",
+        path: "02-concepts/深度学习与多模态输入-驾驶员监测座舱意图-20260811.html",
+        directory: "02-concepts",
+        category: "概念精读",
+        directions: ["人工智能", "汽车"],
+        summary: "以驾驶员监测与座舱意图识别为案例，拆解反向传播、CNN、Transformer、表示学习、迁移学习、音视频融合与成本敏感评测。",
+        date: "2026-08-11",
+        keywords: ["深度学习", "多模态", "驾驶员监测", "座舱意图", "CNN", "Transformer", "音视频融合", "评估"]
+      },
+      {
+        title: "经典机器学习与评估：电池健康度案例",
+        path: "02-concepts/经典机器学习与评估-电池健康度案例-20260811.html",
+        directory: "02-concepts",
+        category: "概念精读",
+        directions: ["人工智能", "汽车"],
+        summary: "围绕电池健康度与零部件异常，比较规则、逻辑回归与树模型，并拆解回归、分类、聚类、降维、交叉验证、校准与因果意识。",
+        date: "2026-08-11",
+        keywords: ["机器学习", "回归", "分类", "树模型", "电池健康度", "评估", "校准"]
+      },
+      {
+        title: "AI研究与学习体系：以汽车为案例的五年进阶路线",
+        path: "02-concepts/AI研究与学习体系-汽车案例版-研究大纲-20260811.html",
+        directory: "02-concepts",
+        category: "概念精读",
+        directions: ["人工智能", "汽车", "数据"],
+        summary: "从基础理论、数据与工程、模型与智能体到汽车全价值链应用，给出产品经理、架构师与 FDE 视角的案例化研究路线。",
+        date: "2026-08-11",
+        keywords: ["AI学习", "研究体系", "汽车", "数据", "架构", "FDE", "智能体"]
+      },
+      {
+        title: "知识图谱 × 本体论：汽车领域从建模到落图",
+        path: "02-concepts/knowledge-graph-ontology/知识图谱×本体论-概念精读-20260805.html",
+        directory: "02-concepts/knowledge-graph-ontology",
+        category: "概念精读",
+        directions: ["人工智能", "汽车"],
+        summary: "从本体建模到汽车领域知识图谱生成的完整教程，覆盖 RDF、OWL、SHACL、查询、推理与工程治理。",
+        date: "2026-08-05",
+        keywords: ["知识图谱", "本体论", "汽车", "语义建模", "RDF", "OWL", "SHACL"]
+      },
+      {
+        title: "汽车零部件开发：RFQ、定点、DV、PV、PPAP、SOP、EOP",
+        path: "06-ai-automotive/汽车零部件开发-RFQ定点DV-PV-PPAP-SOP-EOP-专题研究-20260811.html",
+        directory: "06-ai-automotive",
+        category: "专题研究",
+        directions: ["汽车", "人工智能"],
+        summary: "以高通 SA515M、移远 AG55xQ、Tier1 T-BOX 与整车集成为例，拆解 APQP 产品质量先期策划中的七个关键节点、交付物、责任与放行条件。",
+        date: "2026-08-11",
+        keywords: ["APQP", "RFQ", "定点", "DV", "PV", "PPAP", "SOP", "EOP", "T-BOX", "供应链"]
+      }
+    ];
+
+    const directoryBuckets = {
+      "01-papers": "count-papers",
+      "02-concepts": "count-concepts",
+      "03-code": "count-code",
+      "04-resources": "count-resources",
+      "05-journals": "count-journals",
+      "06-ai-automotive": "count-auto"
+    };
+
+    const searchInput = document.querySelector("#search");
+    const clearSearch = document.querySelector("#clearSearch");
+    const categorySelect = document.querySelector("#category");
+    const results = document.querySelector("#results");
+    const resultCount = document.querySelector("#resultCount");
+    const heroCount = document.querySelector("#heroCount");
+    const directionButtons = [...document.querySelectorAll("[data-direction]")];
+    let activeDirection = "全部";
+
+    const escapeHtml = (value) => String(value).replace(/[&<>'"]/g, (char) => ({
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      "'": "&#39;",
+      "\"": "&quot;"
+    })[char]);
+
+    const formatDate = (value) => value.replaceAll("-", ".");
+
+    function updateDirectoryCounts() {
+      const counts = Object.fromEntries(Object.keys(directoryBuckets).map((key) => [key, 0]));
+      PAGE_INDEX.forEach((page) => {
+        const bucket = Object.keys(counts).find((key) => page.directory === key || page.directory.startsWith(`${key}/`));
+        if (bucket) counts[bucket] += 1;
+      });
+      Object.entries(directoryBuckets).forEach(([bucket, id]) => {
+        document.querySelector(`#${id}`).textContent = counts[bucket];
+      });
+    }
+
+    function render() {
+      const query = searchInput.value.trim().toLocaleLowerCase("zh-CN");
+      const category = categorySelect.value;
+      const filtered = PAGE_INDEX
+        .filter((page) => category === "全部" || page.category === category)
+        .filter((page) => activeDirection === "全部" || page.directions.includes(activeDirection))
+        .filter((page) => {
+          if (!query) return true;
+          const haystack = [page.title, page.summary, page.directory, page.category, ...page.directions, ...page.keywords]
+            .join(" ")
+            .toLocaleLowerCase("zh-CN");
+          return haystack.includes(query);
+        })
+        .sort((a, b) => b.date.localeCompare(a.date) || a.title.localeCompare(b.title, "zh-CN"));
+
+      resultCount.textContent = filtered.length;
+      clearSearch.hidden = !searchInput.value;
+
+      if (!filtered.length) {
+        results.innerHTML = `
+          <div class="empty" role="status">
+            <strong>没有找到符合条件的研究页面</strong>
+            <p>可以缩短关键词，或切换研究方向和内容类型。</p>
+          </div>`;
+        return;
+      }
+
+      results.innerHTML = filtered.map((page) => {
+        const title = escapeHtml(page.title);
+        const path = escapeHtml(page.path);
+        return `
+          <article class="research-item">
+            <div class="item-date">
+              <time datetime="${escapeHtml(page.date)}">${formatDate(escapeHtml(page.date))}</time>
+              <span class="item-category">${escapeHtml(page.category)}</span>
+            </div>
+            <div class="item-main">
+              <h3><a href="${path}">${title}</a></h3>
+              <p class="item-summary">${escapeHtml(page.summary)}</p>
+              <div class="item-meta">
+                <span>${escapeHtml(page.directory)}</span>
+                <span>${page.directions.map(escapeHtml).join(" · ")}</span>
+              </div>
+              <div class="keywords">${page.keywords.slice(0, 5).map((keyword) => `<span class="keyword">${escapeHtml(keyword)}</span>`).join("")}</div>
+            </div>
+            <a class="item-arrow" href="${path}" aria-label="打开：${title}">↗</a>
+          </article>`;
+      }).join("");
+    }
+
+    searchInput.addEventListener("input", render);
+    categorySelect.addEventListener("change", render);
+    clearSearch.addEventListener("click", () => {
+      searchInput.value = "";
+      searchInput.focus();
+      render();
+    });
+    searchInput.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && searchInput.value) {
+        searchInput.value = "";
+        render();
+      }
+    });
+    directionButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        activeDirection = button.dataset.direction;
+        directionButtons.forEach((candidate) => candidate.setAttribute("aria-pressed", String(candidate === button)));
+        render();
+      });
+    });
+
+    heroCount.textContent = PAGE_INDEX.length;
+    updateDirectoryCounts();
+    render();
+  </script>
+</body>
+</html>

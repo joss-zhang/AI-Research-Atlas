@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "skills": {
+    "company-research": {
+      "source": "stophobia/deerflow2.0-enhanced",
+      "sourceType": "github",
+      "skillPath": "skills/public/company-research/SKILL.md",
+      "computedHash": "0fad68be297d51609fd63a9984c1dbf2d089f0df161fb0e0b27fb0d3b08b1767"
+    }
+  }
+}
